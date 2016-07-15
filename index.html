@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Game Scratch</title>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/stage.js/0.8.4/stage.web.min.js"></script>
+  </head>
+  <body>
+    <script>
+      var keys = []
+      document.addEventListener("keydown",function(e) {keys[e.code]=true}, false)
+      document.addEventListener("keyup",function(e) {keys[e.code]=false}, false)
+
+      Stage(function(stage) {
+
+        // Set view box
+        stage.viewbox(1000, 1000)
+
+        // Create an image and append it to stage
+        var box = Stage.image('box').appendTo(stage)
+
+        // Align box to center
+        box.pin('align', 0.5)
+
+        // On mouse click...
+        box.on('click', function(point) {
+          // ...tween scale values of this node
+          this.tween().ease('bounce').pin({
+            scaleX : Math.random() + 0.5,
+            scaleY : Math.random() + 0.5
+          })
+        })
+
+        initPhysics(box)
+        box.tick(function() {
+          box.tickMovement({
+            left: keys['KeyA'],
+            right: keys['KeyD'],
+            up: keys['KeyW'],
+            down: keys['KeyS'],
+            accel: 2,
+            minSpeed: 5,
+            clamp: 50
+          })
+          //box.ax = 0
+          //if (keys['KeyA']) box.ax -= 2
+          //if (keys['KeyD']) box.ax += 2
+          //if (!keys['KeyA'] && !keys['KeyD'] && -5 < box.vx && box.vx < 5) { if (box.vx != 0 ) console.log('boop'); box.vx = 0 }
+          //box.vx += box.ax
+          //var clamp = 50
+          //if (box.vx > clamp) box.vx = clamp
+          //if (box.vx < -clamp) box.vx = -clamp
+          //if (box.vx || box.ax) console.log(box.x, box.vx, box.ax)
+          //box.x += box.vx
+          box.offset(box.x, box.y)
+        })
+      })
+
+      // Adding a texture
+      Stage({
+        image : 'sample.png',
+        textures : {
+          box : { x : 0, y : 0, width : 256, height : 256 }
+        }
+      })
+
+      function initPhysics(elem) {
+        elem.x = elem.y = elem.vx = elem.vy = 0
+        elem.tickMovement = function (opts) {
+          elem.ax = elem.ay = 0
+          if (opts.left)  elem.ax -= opts.accel
+          if (opts.right) elem.ax += opts.accel
+          if (opts.up)    elem.ay -= opts.accel
+          if (opts.down)  elem.ay += opts.accel
+
+          if (opts.minSpeed && !opts.left && !opts.right && -opts.minSpeed < elem.vx && elem.vx < opts.minSpeed) {
+            elem.vx = 0
+          }
+
+          if (opts.minSpeed && !opts.up && !opts.down && -opts.minSpeed < elem.vy && elem.vy < opts.minSpeed) {
+            elem.vy = 0
+          }
+
+          elem.vx += elem.ax
+          elem.vy += elem.ay
+
+          if (clamp = opts.clamp) {
+            if (elem.vx > clamp) elem.vx = clamp
+            if (elem.vx < clamp) elem.vx = -clamp
+            if (elem.vy > clamp) elem.vy = clamp
+            if (elem.vy < clamp) elem.vy = -clamp
+          }
+
+          elem.x += elem.vx
+          elem.y += elem.vy
+        }
+      }
+    </script>
+  </body>
+</html>
+
